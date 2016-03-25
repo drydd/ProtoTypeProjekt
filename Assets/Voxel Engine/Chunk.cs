@@ -1,57 +1,28 @@
 ﻿using UnityEngine;
+using System.Collections;
 
 [RequireComponent(typeof(MeshFilter))]
 [RequireComponent(typeof(MeshRenderer))]
 [RequireComponent(typeof(MeshCollider))]
+
 public class Chunk : MonoBehaviour
 {
-    #region Public Fields
 
+    Block[, ,] blocks;
     public static int chunkSize = 16;
     public bool update = true;
 
-    #endregion Public Fields
-
-    #region Private Fields
-
-    private Block[,,] blocks;
-
-    private MeshCollider coll;
-
-    private MeshFilter filter;
-
-    #endregion Private Fields
-
-    #region Public Methods
-
-    public Block GetBlock(int x, int y, int z)
-    {
-        return blocks[x, y, z];
-    }
-
-    #endregion Public Methods
-
-    #region Private Methods
-
-    //Sends the calculated mesh information
-    //to the mesh and collision components
-    private void RenderMesh()
-    {
-    }
-
-    private void RenderMesh(MeshData meshData)
-    {
-        filter.mesh.Clear();
-        filter.mesh.vertices = meshData.vertices.ToArray();
-        filter.mesh.triangles = meshData.triangles.ToArray();
-    }
+    MeshFilter filter;
+    MeshCollider coll;
 
     // Use this for initialization
-    private void Start()
+    void Start()
     {
+
         filter = gameObject.GetComponent<MeshFilter>();
         coll = gameObject.GetComponent<MeshCollider>();
 
+        //past here is just to set up an example chunk
         blocks = new Block[chunkSize, chunkSize, chunkSize];
 
         for (int x = 0; x < chunkSize; x++)
@@ -66,17 +37,24 @@ public class Chunk : MonoBehaviour
         }
 
         blocks[3, 5, 2] = new Block();
+        blocks[4, 5, 2] = new BlockGrass();
 
         UpdateChunk();
     }
 
-    // Update is called once per frame
-    private void Update()
+    //Update is called once per frame
+    void Update()
     {
+
     }
 
-    //Updates the Chunk based on its contents
-    private void UpdateChunk()
+    public Block GetBlock(int x, int y, int z)
+    {
+        return blocks[x, y, z];
+    }
+
+    // Updates the chunk based on its contents
+    void UpdateChunk()
     {
         MeshData meshData = new MeshData();
 
@@ -94,5 +72,24 @@ public class Chunk : MonoBehaviour
         RenderMesh(meshData);
     }
 
-    #endregion Private Methods
+    // Sends the calculated mesh information
+    // to the mesh and collision components
+    void RenderMesh(MeshData meshData)
+    {
+        filter.mesh.Clear();
+        filter.mesh.vertices = meshData.vertices.ToArray();
+        filter.mesh.triangles = meshData.triangles.ToArray();
+
+        filter.mesh.uv = meshData.uv.ToArray();
+        filter.mesh.RecalculateNormals();
+
+        coll.sharedMesh = null;
+        Mesh mesh = new Mesh();
+        mesh.vertices = meshData.colVertices.ToArray();
+        mesh.triangles = meshData.colTriangles.ToArray();
+        mesh.RecalculateNormals();
+
+        coll.sharedMesh = mesh;
+    }
+
 }
