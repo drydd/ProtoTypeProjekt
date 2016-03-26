@@ -1,80 +1,64 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 [RequireComponent(typeof(MeshFilter))]
 [RequireComponent(typeof(MeshRenderer))]
 [RequireComponent(typeof(MeshCollider))]
-
 public class Chunk : MonoBehaviour
 {
+    #region Public Fields
 
-    Block[, ,] blocks;
     public static int chunkSize = 16;
+    public WorldPos pos;
     public bool update = true;
+    public World world;
 
-    MeshFilter filter;
-    MeshCollider coll;
+    #endregion Public Fields
 
-    // Use this for initialization
-    void Start()
+    #region Private Fields
+
+    private Block[,,] blocks = new Block[chunkSize, chunkSize, chunkSize];
+    private MeshCollider coll;
+    private MeshFilter filter;
+
+    #endregion Private Fields
+
+    #region Public Methods
+
+    //new function
+    public static bool InRange(int index)
     {
+        if (index < 0 || index >= chunkSize)
+            return false;
 
-        filter = gameObject.GetComponent<MeshFilter>();
-        coll = gameObject.GetComponent<MeshCollider>();
-
-        //past here is just to set up an example chunk
-        blocks = new Block[chunkSize, chunkSize, chunkSize];
-
-        for (int x = 0; x < chunkSize; x++)
-        {
-            for (int y = 0; y < chunkSize; y++)
-            {
-                for (int z = 0; z < chunkSize; z++)
-                {
-                    blocks[x, y, z] = new BlockAir();
-                }
-            }
-        }
-
-        blocks[3, 5, 2] = new Block();
-        blocks[4, 5, 2] = new BlockGrass();
-
-        UpdateChunk();
-    }
-
-    //Update is called once per frame
-    void Update()
-    {
-
+        return true;
     }
 
     public Block GetBlock(int x, int y, int z)
     {
-        return blocks[x, y, z];
+        if (InRange(x) && InRange(y) && InRange(z))
+            return blocks[x, y, z];
+        return world.GetBlock(pos.x + x, pos.y + y, pos.z + z);
     }
 
-    // Updates the chunk based on its contents
-    void UpdateChunk()
+    public void SetBlock(int x, int y, int z, Block block)
     {
-        MeshData meshData = new MeshData();
-
-        for (int x = 0; x < chunkSize; x++)
+        if (InRange(x) && InRange(y) && InRange(z))
         {
-            for (int y = 0; y < chunkSize; y++)
-            {
-                for (int z = 0; z < chunkSize; z++)
-                {
-                    meshData = blocks[x, y, z].Blockdata(this, x, y, z, meshData);
-                }
-            }
+            blocks[x, y, z] = block;
         }
-
-        RenderMesh(meshData);
+        else
+        {
+            world.SetBlock(pos.x + x, pos.y + y, pos.z + z, block);
+        }
     }
+
+    #endregion Public Methods
+
+    #region Private Methods
 
     // Sends the calculated mesh information
     // to the mesh and collision components
-    void RenderMesh(MeshData meshData)
+    private void RenderMesh(MeshData meshData)
     {
         filter.mesh.Clear();
         filter.mesh.vertices = meshData.vertices.ToArray();
@@ -92,4 +76,41 @@ public class Chunk : MonoBehaviour
         coll.sharedMesh = mesh;
     }
 
+    // Use this for initialization
+    private void Start()
+    {
+        filter = gameObject.GetComponent<MeshFilter>();
+        coll = gameObject.GetComponent<MeshCollider>();
+    }
+
+    //Update is called once per frame
+    private void Update()
+    {
+        if (update)
+        {
+            update = false;
+            UpdateChunk();
+        }
+    }
+
+    // Updates the chunk based on its contents
+    private void UpdateChunk()
+    {
+        MeshData meshData = new MeshData();
+
+        for (int x = 0; x < chunkSize; x++)
+        {
+            for (int y = 0; y < chunkSize; y++)
+            {
+                for (int z = 0; z < chunkSize; z++)
+                {
+                    meshData = blocks[x, y, z].Blockdata(this, x, y, z, meshData);
+                }
+            }
+        }
+
+        RenderMesh(meshData);
+    }
+
+    #endregion Private Methods
 }
