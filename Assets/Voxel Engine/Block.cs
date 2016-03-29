@@ -1,7 +1,15 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
+[Serializable]
 public class Block
 {
+    #region Public Fields
+
+    public bool changed = true;
+
+    #endregion Public Fields
+
     #region Private Fields
 
     private const float tileSize = 0.25f;

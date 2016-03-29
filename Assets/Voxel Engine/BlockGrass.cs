@@ -1,4 +1,7 @@
-﻿public class BlockGrass : Block
+﻿using System;
+
+[Serializable]
+public class BlockGrass : Block
 {
     #region Public Constructors
 

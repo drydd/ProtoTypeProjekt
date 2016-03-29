@@ -1,4 +1,7 @@
-﻿public struct WorldPos 
+﻿using System;
+
+[Serializable]
+public struct WorldPos 
 {
     #region Public Fields
 

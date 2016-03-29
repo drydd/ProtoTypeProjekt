@@ -8,6 +8,7 @@ public class Chunk : MonoBehaviour
     #region Public Fields
 
     public static int chunkSize = 16;
+    public Block[,,] blocks = new Block[chunkSize, chunkSize, chunkSize];
     public WorldPos pos;
     public bool update = true;
     public World world;
@@ -16,7 +17,6 @@ public class Chunk : MonoBehaviour
 
     #region Private Fields
 
-    private Block[,,] blocks = new Block[chunkSize, chunkSize, chunkSize];
     private MeshCollider coll;
     private MeshFilter filter;
 
@@ -38,6 +38,14 @@ public class Chunk : MonoBehaviour
         if (InRange(x) && InRange(y) && InRange(z))
             return blocks[x, y, z];
         return world.GetBlock(pos.x + x, pos.y + y, pos.z + z);
+    }
+
+    public void SetBlocksUnmodified()
+    {
+        foreach (Block block in blocks)
+        {
+            block.changed = false;
+        }
     }
 
     public void SetBlock(int x, int y, int z, Block block)

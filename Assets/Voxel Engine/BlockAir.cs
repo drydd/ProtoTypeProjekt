@@ -1,4 +1,7 @@
-﻿public class BlockAir : Block
+﻿using System;
+
+[Serializable]
+public class BlockAir : Block
 {
     #region Public Constructors
 
